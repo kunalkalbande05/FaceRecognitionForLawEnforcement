@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SentinelSight - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ALL YOUR EXISTING CSS STAYS THE SAME */
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2d3748;
+            --accent-color: #3182ce;
+            --light-color: #f7fafc;
+            --danger-color: #e53e3e;
+            --success-color: #38a169;
+            --warning-color: #dd6b20;
+            --critical-color: #b22222;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left-color: var(--accent-color);
+        }
+
+        .sidebar-menu i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 0;
+            width: calc(100% - 250px);
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .dashboard-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* Enhanced Alert Badge */
+        .alert-badge-container {
+            position: relative;
+        }
+
+        .alert-badge {
+            background: var(--danger-color);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .alert-badge:hover {
+            background: #c53030;
+            transform: scale(1.05);
+        }
+
+        .badge-count {
+            background: white;
+            color: var(--danger-color);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--danger-color);
+        }
+
+        .alert-badge.pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .logout-btn {
+            background: none;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .logout-btn:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 30px;
+        }
+
+        /* Stats Cards */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            transition: var(--transition);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Feature Sections */
+        .feature-section {
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-color);
+        }
+
+        .section-header h3 {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-header i {
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Camera Section */
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #000;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .video-feed {
+            width: 100%;
+            height: 480px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 480px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #1a202c;
+            color: white;
+            border-radius: var(--border-radius);
+        }
+
+        .video-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .scan-status {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            color: var(--success-color);
+        }
+
+        .status-inactive {
+            color: var(--danger-color);
+        }
+
+        /* Upload Section */
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 25px;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent-color);
+            background: var(--light-color);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--accent-color);
+            background: var(--light-color);
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .preview-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            background-color: var(--light-color);
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table tr:hover {
+            background-color: rgba(49, 130, 206, 0.03);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Enhanced Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background-color: rgba(221, 107, 32, 0.1);
+            color: var(--warning-color);
+        }
+
+        .status-verified {
+            background-color: rgba(56, 161, 105, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-false_positive {
+            background-color: rgba(229, 62, 62, 0.1);
+            color: var(--danger-color);
+        }
+
+        /* Enhanced Alert Styles */
+        .alert {
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            border-left: 4px solid;
+            transition: var(--transition);
+        }
+
+        .alert:hover {
+            transform: translateX(5px);
+        }
+
+        .alert-critical {
+            background-color: rgba(178, 34, 34, 0.05);
+            border-left-color: var(--critical-color);
+        }
+
+        .alert-danger {
+            background-color: rgba(229, 62, 62, 0.05);
+            border-left-color: var(--danger-color);
+        }
+
+        .alert-warning {
+            background-color: rgba(221, 107, 32, 0.05);
+            border-left-color: var(--warning-color);
+        }
+
+        .alert-success {
+            background-color: rgba(56, 161, 105, 0.05);
+            border-left-color: var(--success-color);
+        }
+
+        .alert-info {
+            background-color: rgba(49, 130, 206, 0.05);
+            border-left-color: var(--accent-color);
+        }
+
+        .alert-icon {
+            font-size: 1.3rem;
+            margin-top: 2px;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-critical {
+            background-color: var(--critical-color);
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--accent-color);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Enhanced Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+
+        .toast {
+            background: white;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            min-width: 380px;
+            max-width: 450px;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            border-left: 4px solid;
+            cursor: pointer;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-critical {
+            border-left-color: var(--critical-color);
+        }
+
+        .toast-error {
+            border-left-color: var(--danger-color);
+        }
+
+        .toast-warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .toast-success {
+            border-left-color: var(--success-color);
+        }
+
+        .toast-info {
+            border-left-color: var(--accent-color);
+        }
+
+        .toast:hover {
+            transform: translateX(-5px);
+        }
+
+        .toast-icon {
+            font-size: 1.4rem;
+            margin-top: 2px;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-actions {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.7;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+        }
+
+        /* Alert Level Badges */
+        .alert-level-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 8px;
+        }
+
+        .level-critical { background: var(--critical-color); color: white; }
+        .level-high { background: var(--danger-color); color: white; }
+        .level-medium { background: var(--warning-color); color: white; }
+        .level-low { background: var(--accent-color); color: white; }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+            .main-content {
+                margin-left: 220px;
+                width: calc(100% - 220px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .toast {
+                min-width: 300px;
+                max-width: 350px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .content-area {
+                padding: 20px 15px;
+            }
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            .camera-controls {
+                flex-direction: column;
+            }
+            .top-nav {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+            .toast {
+                min-width: 280px;
+                max-width: 320px;
+                right: 10px;
+            }
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .section-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Enhanced Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>SentinelSight</span>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active" data-section="dashboard-home"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="#" data-section="scan-camera"><i class="fas fa-camera"></i> Live Camera Scan</a></li>
+                <li><a href="#" data-section="upload-database"><i class="fas fa-upload"></i> Add Criminal</a></li>
+                <li><a href="#" data-section="criminal-profiles"><i class="fas fa-user-tag"></i> Criminal Profiles</a></li>
+                <li><a href="#" data-section="match-history"><i class="fas fa-history"></i> Match History</a></li>
+                <li><a href="#" data-section="alerts"><i class="fas fa-bell"></i> Alerts</a></li>
+                <li><a href="/logout" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Navigation -->
+            <div class="top-nav">
+                <h1 class="dashboard-title" id="dashboardTitle">Dashboard</h1>
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">O</div>
+                    <span id="userName">Officer</span>
+                    
+                    <!-- Enhanced Alert Badge -->
+                    <div class="alert-badge-container">
+                        <div class="alert-badge" id="alertBadge" onclick="toggleAlertsSection()">
+                            <i class="fas fa-bell"></i>
+                            <span>Alerts</span>
+                            <span class="badge-count" id="badgeCount" style="display: none;">0</span>
+                        </div>
+                    </div>
+                    
+                    <a href="/logout" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Dashboard Home -->
+                <div id="dashboard-home" class="dashboard-section">
+                    <div class="stats-cards">
+                        <div class="stat-card">
+                            <!-- DUMMY DATA - Hardcoded -->
+                            <div class="stat-number" id="statCriminals">3</div>
+                            <div class="stat-label">Criminal Profiles</div>
+                        </div>
+                        <div class="stat-card">
+                            <!-- DUMMY DATA - Hardcoded -->
+                            <div class="stat-number" id="statMatchesToday">1</div>
+                            <div class="stat-label">Matches Today</div>
+                        </div>
+                        <div class="stat-card">
+                            <!-- DUMMY DATA - Hardcoded -->
+                            <div class="stat-number" id="statPending">0</div>
+                            <div class="stat-label">Pending Verifications</div>
+                        </div>
+                        <div class="stat-card">
+                            <!-- DUMMY DATA - Hardcoded -->
+                            <div class="stat-number" id="statAccuracy">85%</div>
+                            <div class="stat-label">System Accuracy</div>
+                        </div>
+                    </div>
+
+                    <div class="feature-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-bell"></i> Recent Alerts</h3>
+                            <div class="section-actions">
+                                <button class="btn btn-outline btn-sm" onclick="loadAlerts()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                                <button class="btn btn-outline btn-sm" onclick="markAllAlertsRead()">
+                                    <i class="fas fa-check-double"></i> Mark All Read
+                                </button>
+                            </div>
+                        </div>
+                        <div id="alertsContainer">
+                            <!-- DUMMY ALERTS - Hardcoded -->
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle alert-icon"></i>
+                                <div class="alert-content">
+                                    <strong>System started successfully</strong>
+                                    <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #666;">
+                                        Welcome to SentinelSight Dashboard
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="feature-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                            <div class="section-actions">
+                                <button class="btn btn-outline btn-sm" onclick="loadMatches()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Subject</th>
+                                    <th>Location</th>
+                                    <th>Confidence</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matchesContainer">
+                                <!-- DUMMY MATCHES - Hardcoded -->
+                                <tr>
+                                    <td>Just now</td>
+                                    <td>Test Criminal</td>
+                                    <td>Camera Feed</td>
+                                    <td>78%</td>
+                                    <td><span class="status-badge status-pending">pending</span></td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm" onclick="verifyMatch(1, true)">
+                                            <i class="fas fa-check"></i> Verify
+                                        </button>
+                                        <button class="btn btn-danger btn-sm" onclick="verifyMatch(1, false)">
+                                            <i class="fas fa-times"></i> Reject
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Live Camera Scan Section -->
+                <div id="scan-camera" class="dashboard-section" style="display: none;">
+                    <div class="feature-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-camera"></i> Live Face Recognition</h3>
+                        </div>
+                        <p>Start real-time facial recognition scanning using your webcam. The system will automatically detect and match faces against the criminal database.</p>
+                        
+                        <div class="camera-container">
+                            <img src="/video_feed" class="video-feed" id="videoFeed" alt="Live camera feed">
+                        </div>
+                        
+                        <div class="camera-controls">
+                            <button class="btn btn-primary" id="startScanBtn">
+                                <i class="fas fa-play"></i> Start Scanning
+                            </button>
+                            <button class="btn btn-danger" id="stopScanBtn" disabled>
+                                <i class="fas fa-stop"></i> Stop Scanning
+                            </button>
+                            <button class="btn btn-outline" id="testAlertBtn" onclick="testAlertNotification()">
+                                <i class="fas fa-bell"></i> Test Alert
+                            </button>
+                        </div>
+                        <p id="scanStatus" class="scan-status status-inactive">Ready to start scanning</p>
+                    </div>
+
+                    <div class="feature-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-chart-bar"></i> Real-time Statistics</h3>
+                        </div>
+                        <div class="stats-cards">
+                            <!-- DUMMY LIVE STATS - Hardcoded -->
+                            <div class="stat-card">
+                                <div class="stat-number" id="liveFacesDetected">0</div>
+                                <div class="stat-label">Faces Detected</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="liveMatches">0</div>
+                                <div class="stat-label">Potential Matches</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="liveVerified">0</div>
+                                <div class="stat-label">Verified Matches</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Criminal Section -->
+                <div id="upload-database" class="dashboard-section" style="display: none;">
+                    <div class="feature-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-upload"></i> Add New Criminal</h3>
+                        </div>
+                        <p>Upload a clear facial image and provide criminal details to add to the recognition database.</p>
+                        
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h4>Drag & Drop Criminal Photo Here</h4>
+                            <p>or click to browse files</p>
+                            <input type="file" id="criminalImage" class="file-input" accept="image/*">
+                            <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">Supported formats: JPG, PNG, JPEG (Max 10MB)</p>
+                        </div>
+                        
+                        <div class="preview-container" id="imagePreview" style="display: none;">
+                            <img id="previewImage" class="image-preview" alt="Image preview">
+                            <p style="margin-top: 10px; font-size: 0.9rem;">Image preview</p>
+                        </div>
+                        
+                        <form id="criminalForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="criminal_id">Criminal ID *</label>
+                                    <input type="text" id="criminal_id" name="criminal_id" class="form-control" placeholder="e.g., CR-7821" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="name">Full Name *</label>
+                                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter full name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="offenses">Known Offenses *</label>
+                                    <input type="text" id="offenses" name="offenses" class="form-control" placeholder="e.g., Armed Robbery, Assault" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="risk_level">Risk Level *</label>
+                                    <select id="risk_level" name="risk_level" class="form-control" required>
+                                        <option value="">Select risk level</option>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                        <option value="Extreme">Extreme</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="additional_info">Additional Information</label>
+                                <textarea id="additional_info" name="additional_info" class="form-control" rows="4" placeholder="Enter any additional information about the criminal..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="submitCriminalBtn">
+                                <i class="fas fa-save"></i> Add to Database
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Criminal Profiles Section -->
+                <div id="criminal-profiles" class="dashboard-section" style="display: none;">
+                    <div class="feature-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-user-tag"></i> Criminal Database</h3>
+                            <div class="section-actions">
+                                <button class="btn btn-outline btn-sm" onclick="loadCriminals()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <p>Browse and manage all criminal profiles in the database.</p>
+                        <div id="criminalsContainer">
+                            <!-- DUMMY CRIMINALS - Hardcoded -->
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Risk Level</th>
+                                        <th>Offenses</th>
+                                        <th>Added On</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>CR-001</strong></td>
+                                        <td>John Smith</td>
+                                        <td><span class="status-badge status-high">High</span></td>
+                                        <td>Armed Robbery</td>
+                                        <td>Today</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>CR-002</strong></td>
+                                        <td>Mike Johnson</td>
+                                        <td><span class="status-badge status-medium">Medium</span></td>
+                                        <td>Burglary</td>
+                                        <td>Today</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>CR-003</strong></td>
+                                        <td>Sarah Wilson</td>
+                                        <td><span class="status-badge status-low">Low</span></td>
+                                        <td>Shoplifting</td>
+                                        <td>Today</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match History Section -->
+                <div id="match-history" class="dashboard-section" style="display: none;">
+                    <div class="feature-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-history"></i> Match History</h3>
+                            <div class="section-actions">
+                                <button class="btn btn-outline btn-sm" onclick="loadMatches()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <p>Review all facial recognition matches.</p>
+                        <div id="matchesHistoryContainer">
+                            <!-- DUMMY MATCH HISTORY - Hardcoded -->
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Subject</th>
+                                        <th>Location</th>
+                                        <th>Confidence</th>
+                                        <th>Status</th>
+                                        <th>Verified By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Just now</td>
+                                        <td>John Smith</td>
+                                        <td>Camera Feed</td>
+                                        <td>78%</td>
+                                        <td><span class="status-badge status-pending">pending</span></td>
+                                        <td>-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts Section -->
+                <div id="alerts" class="dashboard-section" style="display: none;">
+                    <div class="feature-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-bell"></i> Alert Notifications</h3>
+                            <div class="section-actions">
+                                <button class="btn btn-outline btn-sm" onclick="loadAlerts()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                                <button class="btn btn-primary btn-sm" onclick="markAllAlertsRead()">
+                                    <i class="fas fa-check-double"></i> Mark All Read
+                                </button>
+                            </div>
+                        </div>
+                        <p>All system-generated alerts appear here. You'll receive real-time notifications when matches are detected.</p>
+                        <div id="alertsPageContainer">
+                            <!-- DUMMY ALERTS - Hardcoded -->
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle alert-icon"></i>
+                                <div class="alert-content">
+                                    <strong>System started successfully</strong>
+                                    <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #666;">
+                                        Welcome to SentinelSight Dashboard
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        // SIMPLIFIED dashboard.js - No API calls, just UI interactions
+        let socket = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("🚀 Dashboard loaded with dummy data");
+            initializeApp();
+        });
+
+        function initializeApp() {
+            socket = io();
+            setupSocketEvents();
+            setupEventListeners();
+            // No need to load data - it's already hardcoded in HTML
+        }
+
+        function setupSocketEvents() {
+            socket.on('connect', function() {
+                console.log("✅ Connected to server");
+            });
+
+            // Listen for real alerts from face recognition
+            socket.on('alert', function(data) {
+                console.log("🔔 REAL ALERT RECEIVED:", data);
+                showAlertNotification(data);
+            });
+
+            socket.on('scan_started', function(data) {
+                showToast(data.message, 'success');
+                updateScanStatus(true);
+            });
+
+            socket.on('scan_stopped', function(data) {
+                showToast(data.message, 'info');
+                updateScanStatus(false);
+            });
+
+            socket.on('scan_error', function(data) {
+                showToast(data.message, 'error');
+                updateScanStatus(false);
+            });
+        }
+
+        function setupEventListeners() {
+            // Navigation
+            document.querySelectorAll('.sidebar-menu a[data-section]').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sectionId = link.getAttribute('data-section');
+                    
+                    // Update active link
+                    document.querySelectorAll('.sidebar-menu a').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    
+                    // Show section
+                    document.querySelectorAll('.dashboard-section').forEach(section => {
+                        section.style.display = 'none';
+                    });
+                    document.getElementById(sectionId).style.display = 'block';
+                    
+                    // Update title
+                    document.getElementById('dashboardTitle').textContent = link.textContent;
+                });
+            });
+
+            // Camera controls
+            const startBtn = document.getElementById('startScanBtn');
+            const stopBtn = document.getElementById('stopScanBtn');
+            
+            if (startBtn) {
+                startBtn.addEventListener('click', function() {
+                    this.disabled = true;
+                    this.innerHTML = '<div class="spinner"></div> Starting...';
+                    socket.emit('start_scan', {});
+                });
+            }
+            
+            if (stopBtn) {
+                stopBtn.addEventListener('click', function() {
+                    socket.emit('stop_scan');
+                });
+            }
+
+            // Criminal form
+            const criminalForm = document.getElementById('criminalForm');
+            if (criminalForm) {
+                criminalForm.addEventListener('submit', handleCriminalSubmit);
+            }
+
+            // File upload
+            const fileInput = document.getElementById('criminalImage');
+            const uploadArea = document.getElementById('uploadArea');
+            
+            if (fileInput && uploadArea) {
+                uploadArea.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const preview = document.getElementById('previewImage');
+                            const container = document.getElementById('imagePreview');
+                            if (preview && container) {
+                                preview.src = e.target.result;
+                                container.style.display = 'block';
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        }
+
+        function showAlertNotification(alertData) {
+            console.log("🔄 Showing alert notification:", alertData);
+            
+            // Show toast notification
+            showToast(`🚨 ${alertData.criminal_name} detected - ${alertData.confidence}%`, 'warning');
+            
+            // Update alert badge
+            const badgeCount = document.getElementById('badgeCount');
+            if (badgeCount) {
+                const currentCount = parseInt(badgeCount.textContent) || 0;
+                badgeCount.textContent = currentCount + 1;
+                badgeCount.style.display = 'flex';
+                
+                // Pulse animation
+                const alertBadge = document.getElementById('alertBadge');
+                if (alertBadge) {
+                    alertBadge.classList.add('pulse');
+                    setTimeout(() => alertBadge.classList.remove('pulse'), 2000);
+                }
+            }
+            
+            // Create a new alert in the UI
+            const newAlert = {
+                message: `🚨 ${alertData.criminal_name} detected - ${alertData.confidence}%`,
+                timestamp: new Date().toLocaleString()
+            };
+            
+            // Add to alerts containers
+            const containers = ['alertsContainer', 'alertsPageContainer'];
+            containers.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    const emptyState = container.querySelector('.empty-state');
+                    if (emptyState) {
+                        emptyState.remove();
+                    }
+                    
+                    const alertHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-bell alert-icon"></i>
+                            <div class="alert-content">
+                                <strong>${newAlert.message}</strong>
+                                <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #666;">
+                                    ${newAlert.timestamp}
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.insertAdjacentHTML('afterbegin', alertHTML);
+                }
+            });
+        }
+
+        async function handleCriminalSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const imageFile = document.getElementById('criminalImage').files[0];
+            
+            if (!imageFile) {
+                showToast('Please select an image', 'error');
+                return;
+            }
+            
+            formData.append('image', imageFile);
+            formData.append('criminal_id', document.getElementById('criminal_id').value);
+            formData.append('name', document.getElementById('name').value);
+            formData.append('offenses', document.getElementById('offenses').value);
+            formData.append('risk_level', document.getElementById('risk_level').value);
+
+            const submitBtn = document.getElementById('submitCriminalBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="spinner"></div> Adding...';
+
+            try {
+                const response = await fetch('/api/criminals', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    e.target.reset();
+                    document.getElementById('imagePreview').style.display = 'none';
+                    document.getElementById('criminalImage').value = '';
+                    
+                    // Update criminal count in UI
+                    const criminalCount = document.getElementById('statCriminals');
+                    criminalCount.textContent = parseInt(criminalCount.textContent) + 1;
+                    
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                showToast('Error adding criminal', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Add to Database';
+            }
+        }
+
+        function updateScanStatus(scanning) {
+            const startBtn = document.getElementById('startScanBtn');
+            const stopBtn = document.getElementById('stopScanBtn');
+            const status = document.getElementById('scanStatus');
+            
+            if (startBtn) {
+                startBtn.disabled = scanning;
+                startBtn.innerHTML = '<i class="fas fa-play"></i> Start Scanning';
+            }
+            if (stopBtn) stopBtn.disabled = !scanning;
+            if (status) {
+                status.textContent = scanning ? '🟢 Scanning active' : '🔴 Ready to start';
+                status.className = `scan-status ${scanning ? 'status-active' : 'status-inactive'}`;
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : type === 'warning' ? '#ffc107' : '#17a2b8'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 5px;
+                z-index: 10000;
+                max-width: 400px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 5000);
+        }
+
+        // Dummy functions that don't call APIs
+        function loadAlerts() {
+            showToast('Alerts refreshed', 'info');
+        }
+
+        function loadMatches() {
+            showToast('Matches refreshed', 'info');
+        }
+
+        function loadCriminals() {
+            showToast('Criminals refreshed', 'info');
+        }
+
+        function markAllAlertsRead() {
+            const badgeCount = document.getElementById('badgeCount');
+            badgeCount.style.display = 'none';
+            badgeCount.textContent = '0';
+            showToast('All alerts marked as read', 'success');
+        }
+
+        function toggleAlertsSection() {
+            document.querySelector('[data-section="alerts"]').click();
+        }
+
+        // Global functions
+        window.verifyMatch = function(matchId, verified) {
+            showToast(`Match ${verified ? 'verified' : 'rejected'}`, 'success');
+        };
+
+        window.testAlertNotification = function() {
+            showAlertNotification({
+                criminal_name: 'Test Criminal',
+                confidence: 85,
+                timestamp: new Date().toLocaleTimeString()
+            });
+            showToast('Test alert triggered', 'info');
+        };
+    </script>
+</body>
+</html>
